@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아재력 충만 MBTI 테스트</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fef9c3; /* 따뜻한 파스텔 옐로우 */
+        }
+        .title-font {
+            font-family: 'Jua', sans-serif;
+        }
+        /* 네오 브루탈리즘 스타일 그림자 */
+        .brutal-shadow {
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+        .brutal-shadow-sm {
+            box-shadow: 3px 3px 0px 0px #000000;
+        }
+        .brutal-shadow-inset {
+            box-shadow: inset 3px 3px 0px 0px #000000;
+        }
+        /* 재미있는 펄스 애니메이션 */
+        @keyframes custom-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-slow {
+            animation: custom-bounce 2s infinite;
+        }
+        /* 게이지 바 부드러운 전환 */
+        .progress-transition {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-black selection:text-yellow-300">
+
+    <div class="w-full max-w-md bg-white border-4 border-black rounded-3xl p-6 brutal-shadow relative overflow-hidden my-4">
+        
+        <!-- 데코레이션 요소 -->
+        <div class="absolute -top-12 -right-12 w-24 h-24 bg-red-400 border-4 border-black rounded-full z-0 opacity-20"></div>
+        <div class="absolute -bottom-8 -left-8 w-20 h-20 bg-blue-400 border-4 border-black rounded-full z-0 opacity-20"></div>
+        
+        <!-- 콘텐츠 영역 -->
+        <div class="relative z-10">
+            
+            <!-- 1. 메인 시작 화면 -->
+            <div id="start-screen" class="text-center py-4">
+                <div class="inline-block bg-yellow-300 border-2 border-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 brutal-shadow-sm">
+                    🔥 썰렁함 주의 / 킹받음 주의 🔥
+                </div>
+                <h1 class="title-font text-4xl md:text-5xl text-black mb-2 leading-tight">
+                    아재력 충만<br><span class="text-indigo-600">MBTI 테스트</span>
+                </h1>
+                <p class="text-gray-700 text-sm md:text-base font-semibold mb-6">
+                    나는 과연 부장님의 후계자일까, <br>아니면 철저한 아재개그 방어막일까?
+                </p>
+
+                <!-- 메인 캐릭터 일러스트 (SVG) -->
+                <div class="w-48 h-48 mx-auto my-6 animate-bounce-slow flex items-center justify-center bg-teal-100 border-4 border-black rounded-2xl brutal-shadow relative">
+                    <!-- 재미있는 아재 안경 코안경 캐릭터 -->
+                    <svg viewBox="0 0 100 100" class="w-40 h-40">
+                        <circle cx="50" cy="50" r="40" fill="#FFEAA7" stroke="#000" stroke-width="3"/>
+                        <!-- 눈썹 -->
+                        <path d="M 25 35 Q 35 25 45 35" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M 55 35 Q 65 25 75 35" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+                        <!-- 안경 -->
+                        <circle cx="35" cy="45" r="12" fill="none" stroke="#000" stroke-width="4"/>
+                        <circle cx="65" cy="45" r="12" fill="none" stroke="#000" stroke-width="4"/>
+                        <line x1="47" y1="45" x2="53" y2="45" stroke="#000" stroke-width="4"/>
+                        <!-- 콧수염 -->
+                        <path d="M 35 62 Q 50 50 65 62 Q 50 72 35 62" fill="#2D3436" stroke="#000" stroke-width="2"/>
+                        <!-- 입 -->
+                        <path d="M 43 72 Q 50 78 57 72" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+                        <!-- 볼터치 -->
+                        <circle cx="23" cy="52" r="4" fill="#FF7675" opacity="0.6"/>
+                        <circle cx="77" cy="52" r="4" fill="#FF7675" opacity="0.6"/>
+                    </svg>
+                    <!-- 말풍선 -->
+                    <div class="absolute -top-3 -right-4 bg-black text-white text-xs px-2 py-1 rounded-md brutal-shadow-sm font-bold rotate-12">
+                        "너 납치된 거야" 🍍
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <button onclick="startTest()" class="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-black text-xl border-4 border-black rounded-xl brutal-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all title-font">
+                        테스트 시작하기! <i class="fa-solid fa-play ml-2"></i>
+                    </button>
+                    <p class="text-xs text-gray-500">
+                        * 사운드를 켜고 플레이하시면 아재력이 2배 증가합니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. 퀴즈 진행 화면 -->
+            <div id="quiz-screen" class="hidden">
+                <!-- 상단 헤더 & 게이지 -->
+                <div class="flex justify-between items-center mb-4">
+                    <span id="question-index" class="title-font text-lg text-black bg-yellow-200 border-2 border-black px-3 py-1 rounded-full brutal-shadow-sm">
+                        Q. 1 / 12
+                    </span>
+                    <div class="w-2/3 bg-gray-200 border-2 border-black rounded-full h-4 overflow-hidden relative">
+                        <div id="progress-bar" class="bg-teal-400 h-full progress-transition rounded-full" style="width: 8.33%;"></div>
+                    </div>
+                </div>
+
+                <!-- 질문 텍스트 -->
+                <div class="bg-purple-100 border-4 border-black rounded-2xl p-5 mb-6 brutal-shadow min-h-[140px] flex flex-col justify-center">
+                    <p id="question-text" class="text-base md:text-lg font-black text-black leading-snug">
+                        로딩 중...
+                    </p>
+                </div>
+
+                <!-- 옵션 버튼 -->
+                <div class="space-y-4">
+                    <button id="option-a" onclick="selectAnswer('A')" class="w-full text-left p-4 bg-white hover:bg-yellow-50 border-4 border-black rounded-xl brutal-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all font-semibold text-black text-sm md:text-base leading-relaxed">
+                        옵션 A
+                    </button>
+                    <button id="option-b" onclick="selectAnswer('B')" class="w-full text-left p-4 bg-white hover:bg-teal-50 border-4 border-black rounded-xl brutal-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all font-semibold text-black text-sm md:text-base leading-relaxed">
+                        옵션 B
+                    </button>
+                </div>
+
+                <!-- 이전 질문으로 돌아가기 -->
+                <div class="mt-6 text-center">
+                    <button onclick="prevQuestion()" id="prev-btn" class="text-sm font-bold text-gray-600 hover:text-black hover:underline disabled:opacity-50 disabled:no-underline" disabled>
+                        <i class="fa-solid fa-arrow-left mr-1"></i> 이전 질문으로
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. 결과 계산 중 로딩 화면 -->
+            <div id="loading-screen" class="hidden text-center py-12">
+                <div class="w-24 h-24 mx-auto mb-6 relative">
+                    <!-- 회전하는 태극문양 스타일 아재 바람개비 -->
+                    <div class="w-full h-full border-8 border-dashed border-indigo-600 rounded-full animate-spin"></div>
+                    <span class="absolute inset-0 flex items-center justify-center text-3xl">👴</span>
+                </div>
+                <h3 class="title-font text-2xl text-black mb-2">아재력 측정 중...</h3>
+                <p id="loading-tip" class="text-sm text-gray-600 font-bold animate-pulse px-4">
+                    "뇌 속에 부장님 세포 이식하는 중..."
+                </p>
+            </div>
+
+            <!-- 4. 결과 출력 화면 -->
+            <div id="result-screen" class="hidden">
+                <div class="text-center mb-6">
+                    <span class="bg-black text-yellow-300 text-xs font-bold px-3 py-1 rounded-full brutal-shadow-sm uppercase">
+                        나의 아재 MBTI 분석 결과
+                    </span>
+                    <h2 id="result-mbti" class="title-font text-5xl text-indigo-600 my-2">ESTJ</h2>
+                    <h1 id="result-title" class="title-font text-2xl md:text-3xl text-black leading-tight">
+                        "부장님 상사의 정석"
+                    </h1>
+                    <p id="result-subtitle" class="text-gray-500 text-sm font-bold mt-1">
+                        체계적으로 짜여진 썰렁 개그의 지휘자
+                    </p>
+                </div>
+
+                <!-- 아재력 게이지 일러스트 -->
+                <div class="border-4 border-black rounded-2xl p-4 bg-amber-50 mb-6 brutal-shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-black text-sm">🔥 나의 아재력 스탯</span>
+                        <span id="result-stat-percent" class="title-font text-indigo-600 text-lg">85%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 border-2 border-black rounded-full h-5 overflow-hidden">
+                        <div id="result-stat-bar" class="bg-red-500 h-full progress-transition" style="width: 85%;"></div>
+                    </div>
+                    <p id="result-stat-comment" class="text-xs text-gray-600 mt-2 text-center font-semibold">
+                        이미 당신의 뇌는 부장님 수준입니다.
+                    </p>
+                </div>
+
+                <!-- 상세 설명 카드 -->
+                <div class="space-y-4 mb-6">
+                    <div class="bg-white border-4 border-black rounded-2xl p-4 brutal-shadow-sm">
+                        <h4 class="font-black text-base text-black mb-2 flex items-center">
+                            <span class="mr-2">📝</span> 아재 요약 분석
+                        </h4>
+                        <p id="result-description" class="text-sm text-gray-700 leading-relaxed">
+                            로딩 에러
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-50 border-4 border-black rounded-2xl p-3 brutal-shadow-sm">
+                            <h5 class="font-black text-xs text-blue-800 mb-1">👍 아재력 강점</h5>
+                            <p id="result-strength" class="text-xs text-gray-700 leading-normal">
+                                드립 대장
+                            </p>
+                        </div>
+                        <div class="bg-red-50 border-4 border-black rounded-2xl p-3 brutal-shadow-sm">
+                            <h5 class="font-black text-xs text-red-800 mb-1">👎 아재력 약점</h5>
+                            <p id="result-weakness" class="text-xs text-gray-700 leading-normal">
+                                리액션 실종 시 시무룩
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 환상의 궁합 / 환장의 궁합 -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 border-4 border-black rounded-xl p-3 brutal-shadow-sm text-center">
+                        <div class="text-xs text-gray-500 font-bold">🤝 환상의 짝꿍</div>
+                        <div id="result-best" class="title-font text-sm text-green-700 mt-1 font-bold">ESFP</div>
+                    </div>
+                    <div class="bg-stone-100 border-4 border-black rounded-xl p-3 brutal-shadow-sm text-center">
+                        <div class="text-xs text-gray-500 font-bold">🚫 환장의 짝꿍</div>
+                        <div id="result-worst" class="title-font text-sm text-red-700 mt-1 font-bold">ISTJ</div>
+                    </div>
+                </div>
+
+                <!-- 오늘의 아재개그 발전기 (보너스 미니코너) -->
+                <div class="bg-yellow-100 border-4 border-black rounded-2xl p-4 brutal-shadow mb-6">
+                    <h4 class="title-font text-md text-black mb-1 flex items-center justify-between">
+                        <span>💡 실전! 오늘의 아재개그 충전</span>
+                        <button onclick="generateJoke()" class="bg-black text-white text-xs px-2 py-1 rounded brutal-shadow-sm active:translate-y-0.5">
+                            새로고침 <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </h4>
+                    <div class="bg-white border-2 border-black rounded-xl p-3 mt-2">
+                        <p id="joke-question" class="font-black text-sm text-indigo-700">Q. 세상에서 가장 뜨거운 과일은?</p>
+                        <button id="joke-answer-btn" onclick="revealJokeAnswer()" class="mt-2 w-full py-1 bg-teal-400 hover:bg-teal-500 text-black border-2 border-black rounded text-xs font-bold transition-colors">
+                            정답 확인하기 (클릭)
+                        </button>
+                        <p id="joke-answer" class="hidden mt-2 font-black text-sm text-red-600 text-center animate-bounce">
+                            A. 천혜향 (천도 복숭아 아님)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 작업 컨트롤 버튼 -->
+                <div class="space-y-3">
+                    <button onclick="shareLink()" class="w-full py-3 bg-teal-400 hover:bg-teal-500 text-black font-black text-lg border-4 border-black rounded-xl brutal-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+                        결과 링크 복사하기 <i class="fa-solid fa-copy ml-1"></i>
+                    </button>
+                    <button onclick="restartTest()" class="w-full py-3 bg-white hover:bg-gray-100 text-black font-black text-lg border-4 border-black rounded-xl brutal-shadow active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+                        테스트 다시하기 <i class="fa-solid fa-rotate-left ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 토스트 알림창 (알럿 금지 대응) -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black text-white border-4 border-white px-6 py-3 rounded-full brutal-shadow z-50 opacity-0 pointer-events-none transition-all duration-300 font-bold text-sm">
+        링크가 복사되었습니다!
+    </div>
+
+    <script>
+        // Web Audio API를 사용한 사운드 칩셋 (외부 사운드 URL 방지)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                // 상큼한 똑 소리
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'bounce') {
+                // 뿅~ 하는 스프링 소리 (표준 오디오 램프 함수 적용)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'success') {
+                // 경쾌한 아재개그 유치뽕짝 멜로디 (둥둥탁!)
+                const now = audioCtx.currentTime;
+                // 드럼 둥둥
+                const oscD = audioCtx.createOscillator();
+                const gainD = audioCtx.createGain();
+                oscD.connect(gainD);
+                gainD.connect(audioCtx.destination);
+                oscD.frequency.setValueAtTime(80, now);
+                oscD.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+                gainD.gain.setValueAtTime(0.3, now);
+                gainD.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                oscD.start();
+                oscD.stop(now + 0.15);
+
+                // 뒤이어 탁! 하는 심벌 느낌
+                setTimeout(() => {
+                    const oscC = audioCtx.createOscillator();
+                    const gainC = audioCtx.createGain();
+                    oscC.connect(gainC);
+                    gainC.connect(audioCtx.destination);
+                    oscC.type = 'triangle';
+                    oscC.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gainC.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainC.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    oscC.start();
+                    oscC.stop(audioCtx.currentTime + 0.2);
+                }, 150);
+            }
+        }
+
+        // 12개 질문 데이터베이스 (EI, SN, TF, JP 각각 3문항씩)
+        const questions = [
+            // E vs I (외향 vs 내향)
+            {
+                dimension: "EI",
+                text: "단톡방에서 부장님이 '세상에서 가장 야한 채소는? 버섯!'이라는 개그를 날렸다. 나의 반응은?",
+                optionA: "'엌ㅋㅋㅋㅋ 버섯ㅋㅋㅋㅋ 진짜 천재적이시네요!' 폭풍 리액션과 함께 다른 톡방에도 소문낸다.",
+                optionB: "(조용히 톡방을 읽씹하거나 하트 이모티콘 하나만 슬쩍 보낸 뒤 혼자 마음속으로 피식한다.)"
+            },
+            {
+                dimension: "EI",
+                text: "길을 가다 기가 막힌 아재개그 간판('돼지갈비가 맛있다구? 돼지지!')을 발견했을 때?",
+                optionA: "바로 카메라 켜서 인스타 스토리에 공유하고 친구들 태그를 우다다 건다.",
+                optionB: "사진만 찍어 개인 소장하거나 제일 친한 단짝 친구 한 명에게만 조용히 갠톡한다."
+            },
+            {
+                dimension: "EI",
+                text: "아재개그 모임에 처음 참가했을 때 당신의 포지션은?",
+                optionA: "모임 중앙에서 벼르고 온 필살 드립들을 쏟아내며 메인 스피커를 자처한다.",
+                optionB: "구석에서 고수들의 아재개그를 들으며 고개만 끄덕이다가 주옥같은 리액션을 툭 던진다."
+            },
+            // S vs N (감각 vs 직관)
+            {
+                dimension: "SN",
+                text: "'참기름이 고소당한 이유는? 이 고소해서!' 라는 말을 들었을 때 머릿속 생각은?",
+                optionA: "'참기름이 진짜 고소해서(savory) 고소(lawsuit)당했다니, 기발한 언어유희네.'하고 납득한다.",
+                optionB: "'그럼 들기름은 변호사인가? 고소 냄새가 진동해서 판사가 공판 진행 중에 침 질질 흘리겠네.' 등 상상의 나래를 편다."
+            },
+            {
+                dimension: "SN",
+                text: "'소가 계단을 올라간다를 세 글자로? 소오름!' 이라는 문제를 풀었다.",
+                optionA: "소 + 오름(올라감)이라 소오름이군. 매우 직관적이고 깔끔한 매칭이라며 인정한다.",
+                optionB: "소오름? 소가 계단 올라가면 엄청 쿵쾅거릴 텐데 계단이 무너지지 않을까? 소의 무릎 연골은 괜찮나?"
+            },
+            {
+                dimension: "SN",
+                text: "'세상에서 가장 가난한 왕은? 최저임금!' 이라는 드립에 대한 느낌은?",
+                optionA: "아! 임금(King)이랑 노동 가치인 임금(Wage)을 엮은 센스구만! 깔끔하다.",
+                optionB: "그럼 최저임금 나라의 백성들은 다 알바생인가? 신하들도 유니폼 입고 근무하겠네?"
+            },
+            // T vs F (사고 vs 감정)
+            {
+                dimension: "TF",
+                text: "친구가 진지하게 '나 아재개그 들었는데 너무 썰렁해서 감기 걸릴 것 같아...' 라고 고통을 호소할 때 나의 대답은?",
+                optionA: "감기는 바이러스 감염증이기 때문에 썰렁한 개그와 의학적으로 무관해. 손이나 잘 씻어.",
+                optionB: "어머 ㅠㅠ 얼마나 오싹했으면 그래! 따뜻한 국밥이라도 한 그릇 하러 가자 ㅋㅋㅋ"
+            },
+            {
+                dimension: "TF",
+                text: "내가 정성껏 준비한 아재개그를 단톡방에 던졌는데 차갑게 읽씹을 당했다.",
+                optionA: "'지금 다들 일하는 중이군.' 혹은 '내 개그 타율이 낮았다. 보완해야지.'라며 분석한다.",
+                optionB: "'헐... 내가 분위기를 망쳤나? 애들이 나 싫어하는 건 아니겠지 ㅠㅠ' 하고 이불킥하며 위축된다."
+            },
+            {
+                dimension: "TF",
+                text: "직장 상사가 진짜 너무나도 재미없고 추운 아재개그를 당신에게만 단독으로 시전했다.",
+                optionA: "기계적으로 평온한 미소를 짓고 '하하, 신선하네요.'라고 건조하게 피드백해준다.",
+                optionB: "영혼까지 탈탈 끌어모아 뒤집어지는 가짜 리액션을 연발하며 '대리님 최고예요!'를 외친다."
+            },
+            // J vs P (판단 vs 인식)
+            {
+                dimension: "JP",
+                text: "친구들과 술자리에서 치명적인 아재개그를 던지고 싶을 때 당신의 타이밍 조절은?",
+                optionA: "술자리 흐름을 정교하게 분석한 뒤, 가장 알맞은 단어와 매칭되는 타이밍에 빌드업해서 던진다.",
+                optionB: "그냥 눈앞에 보이는 사물(예: 숟가락)을 보자마자 즉흥적으로 드립을 지른다."
+            },
+            {
+                dimension: "JP",
+                text: "아재개그 배틀 대회에 참가 신청을 했을 때, 당신의 대비 전략은?",
+                optionA: "카테고리별(동물, 과일, 인물) 족보 리스트를 문서로 짜서 암기하고 제스처까지 완벽히 트레이닝한다.",
+                optionB: "개그는 기세와 유연함! 즉흥 애드리브와 현장 분위기에 맞춰 날것의 개그를 선보인다."
+            },
+            {
+                dimension: "JP",
+                text: "간판 이름이 웃긴 언어유희 맛집('돈벼락 삼겹살')을 가기로 했다. 당신이 약속을 리드하는 스타일은?",
+                optionA: "가게의 평점, 브레이크타임, 베스트 메뉴를 철저히 조사하고 완벽한 타임라인을 제공한다.",
+                optionB: "가다가 마음에 드는 이상한 이름의 맛집이 보이면 '오! 저기 갈까?' 하고 즉석에서 계획을 바꾼다."
+            }
+        ];
+
+        // 16가지 MBTI 상세 분석 데이터베이스
+        const mbtiResults = {
+            "ESTJ": {
+                title: "부장님 상사의 정석 👔",
+                subtitle: "체계적으로 짜여진 썰렁 개그의 지휘자",
+                description: "당신은 아재개그를 철저한 논리 구조 하에 설계하여 적재적소에 전략 무기처럼 살포하는 스타일입니다. 흐지부지한 리액션은 절대 용납하지 않으며, 무려 파워포인트로 아재개그 족보를 정리할 수도 있는 무시무시한 오거나이저입니다.",
+                strength: "적절한 상황 대입력과 가차없는 당당함",
+                weakness: "사람들이 리액션을 안 해주면 정색함",
+                best: "INFP (따뜻한 리액션 리액터)",
+                worst: "ISTP (한심한 눈빛 발사기)",
+                score: 85
+            },
+            "ENTJ": {
+                title: "아재 제국의 독재 지배자 👑",
+                subtitle: "드립의 세계를 정복하러 온 야심가",
+                description: "당신은 개그 하나로 온 좌중을 지배하고 장악하려 합니다. 한 번 드립을 던지면 그것을 기점으로 큰 웃음 폭탄을 연속 빌드업합니다. 주변인들은 당신의 넘치는 카리스마와 킹받는 드립에 어쩔 수 없이 지배당하게 됩니다.",
+                strength: "엄청난 스케일의 빌드업 개그",
+                weakness: "재미없는 개그를 지적받으면 이길 때까지 지름",
+                best: "INFP (방구석 웃음 감별사)",
+                worst: "ISFP (소리 없이 퇴장하는 친구)",
+                score: 90
+            },
+            "ESFJ": {
+                title: "부장님의 마당발 오작교 🌸",
+                subtitle: "소외받는 썰렁 드립도 안아주는 수호천사",
+                description: "당신은 본인의 드립보다 타인의 썰렁 드립을 주워 담아 구원하는 구세주입니다. 부장님이 시시껄렁한 아재개그를 해도 영혼을 불어넣은 따뜻한 호응으로 모임 분위기를 완벽하게 케어해 주는 천사 같은 존재입니다.",
+                strength: "빛나는 리액션과 타인에 대한 따스한 배려",
+                weakness: "너무 맞춰주느라 가끔 본인 귀가 썩어 들어감",
+                best: "ISFP (리액션 가성비 극강)",
+                worst: "INTJ (왜 웃지? 분석단)",
+                score: 60
+            },
+            "ENFJ": {
+                title: "평화주의 개그 전도사 🕊️",
+                subtitle: "모든 인류가 아재개그로 웃을 때까지",
+                description: "당신은 유쾌한 긍정 에너지로 썰렁한 세상을 따뜻하게 녹이고자 합니다. 사람들을 기분 좋게 해주고 싶은 순수한 욕심으로 아재개그를 수련하며, 리액션을 얻으면 세상을 다 가진 듯한 표정을 짓곤 합니다.",
+                strength: "호불호 없는 사랑스러운 감성 아재력",
+                weakness: "상대방 정색 시 마음의 큰 내상을 입음",
+                best: "INFP (무한 긍정 지지자)",
+                worst: "ISTJ (정색하는 팩트 폭격기)",
+                score: 75
+            },
+            "ESTP": {
+                title: "날것의 길거리 맑스 드립퍼 ⚡",
+                subtitle: "몸개그와 아재개그의 기막힌 융합",
+                description: "당신은 브레이크가 고장 난 스포츠카 같습니다. 머릿속에 드립이 스치는 순간 필터 없이 밖으로 튀어나갑니다. 순발력이 매우 좋아서, 눈앞에 보이는 물건이나 상황을 0.1초 만에 킹받는 농담으로 바꿀 수 있는 재능을 가졌습니다.",
+                strength: "압도적인 스피드와 동물적 감각의 순발력",
+                weakness: "뇌를 거치지 않고 나와서 쿨타임 필요함",
+                best: "ISFJ (조용히 챙겨주는 수습 대리)",
+                worst: "INFJ (심오한 철학 세계관 소유자)",
+                score: 95
+            },
+            "ENTP": {
+                title: "아가리 드립 파이터 🥊",
+                subtitle: "상대방의 이성을 마비시키는 악마의 입담",
+                description: "당신은 아재개그를 일종의 멘탈 공격 무기로 씁니다. 상대가 말문이 막혀서 괴로워하는 모습을 보고 쾌감을 느끼는 변태(?)적인 아재 본능을 지니고 있습니다. 반박할 수 없는 논리적 썰렁함으로 상대를 굴복시킵니다.",
+                strength: "상상도 못한 참신함과 킹받게 만드는 천재성",
+                weakness: "상대가 지루해하면 광적으로 흥분함",
+                best: "INFJ (조용히 경청하다 현타 오는 자)",
+                worst: "ISFJ (쿠쿠다스 멘탈 소유자)",
+                score: 98
+            },
+            "ESFP": {
+                title: "걸어다니는 축제 확성기 📣",
+                subtitle: "리액션이 없으면 내가 혼자 다 한다",
+                description: "당신은 드립 하나 던지고 본인이 세상에서 가장 큰 소리로 '앜ㅋㅋㅋ 대박 ㅋㅋㅋ' 하며 자지러집니다. 사람들의 시선 따윈 아랑곳하지 않으며 온 우주의 활기를 끌어모아 술자리 분위기를 단숨에 주도하는 무대 체질입니다.",
+                strength: "미친 텐션과 축복받은 성대 볼륨",
+                weakness: "에너지가 너무 금방 방전되어 급조용해짐",
+                best: "ISFJ (우쭈쭈해 주는 수호단)",
+                worst: "INTJ (한심해하는 지성파)",
+                score: 80
+            },
+            "ENFP": {
+                title: "맑은 눈의 개그 광인 🤪",
+                subtitle: "우주급 호기심이 만든 4차원 드립퍼",
+                description: "당신은 상상력이 너무 뛰어난 나머지, 아재개그 하나로 우주 정복까지 갈 법한 망상을 늘어놓습니다. 엉뚱하고 신비로운 빌드업 때문에 사람들이 썰렁해서가 아니라 '어이가 없어서' 웃기게 만드는 기적의 아티스트입니다.",
+                strength: "비교 불가능한 독창성과 순수함",
+                weakness: "한번 삘 꽂히면 드립을 멈출 수 없음",
+                best: "INFJ (다정하게 고개 끄덕여 줌)",
+                worst: "ISTJ (진지한 표정으로 팩트 체크)",
+                score: 78
+            },
+            "ISTJ": {
+                title: "서류철 속 엑셀 아재 📁",
+                subtitle: "아재 드립을 사전적으로 정의하는 사나이",
+                description: "당신은 매우 과묵하지만, 속으로는 이미 유행했던 아재개그 리스트를 완벽하게 데이터화하고 분석해 두었습니다. 가끔 입을 열 때 아주 정형화되고 완벽한 정통파 아재개그를 오차 없이 정확하게 타격합니다.",
+                strength: "정석적인 타이밍과 완벽한 정밀 타격",
+                weakness: "너무 뻔하고 정통파적인 맛에 신선함 제로",
+                best: "ESFJ (리액션 가성비 천사)",
+                worst: "ENFP (날뛰는 4차원 마인드)",
+                score: 45
+            },
+            "ISFJ": {
+                title: "조용히 웃어주는 병풍 가이드 🛡️",
+                subtitle: "친구들이 던진 똥드립도 정성스레 수거함",
+                description: "본인은 아재개그를 부끄러워해서 직접 잘 하진 않지만, 남이 던지는 아재개그에 '어머~ 그게 뭐예요 ㅋㅋㅋ' 하면서 눈웃음으로 공기 정화를 담당합니다. 분위기가 썰렁해지면 남 몰래 슬쩍 수습하는 고귀한 성품입니다.",
+                strength: "주변을 편안하게 만드는 만능 윤활유",
+                weakness: "리액션 기계를 너무 돌려서 가끔 안면 마비 옴",
+                best: "ESFP (텐션 마스터)",
+                worst: "ENTP (끝도 없이 약 올리는 파이터)",
+                score: 30
+            },
+            "INFJ": {
+                title: "영혼의 통찰자 예언 옹 🔮",
+                subtitle: "눈빛만 봐도 무슨 드립칠지 다 보임",
+                description: "상대방이 입술을 채 떼기도 전에 '무슨 아재개그 하려는지 알겠다'며 소름 돋게 마음을 읽어버립니다. 속으로는 온갖 차원 높은 말장난을 생각하지만 세상 사람들의 수준에 맞춰 겉으론 그저 고귀한 척 모르는 체해 줍니다.",
+                strength: "미스터리할 정도의 마음 독해 능력",
+                weakness: "가끔 혼자만의 무거운 분위기에 취함",
+                best: "ENFP (행복을 전파하는 해피바이러스)",
+                worst: "ESTP (날것 그대로 폭격하는 사람)",
+                score: 40
+            },
+            "INTJ": {
+                title: "고독한 개그 평론가 🧠",
+                subtitle: "학술적으로 개그의 본질을 분석함",
+                description: "당신에게 아재개그란 언어학적 연구 대상에 불과합니다. 남들이 웃을 때 '이 개그의 웃음 포인트는 발음의 유사성과 음성 상징성에서 기인하는군'이라며 팔짱 끼고 학구적으로 정색하는 뇌섹남/녀 스타일입니다.",
+                strength: "감정 동요 없는 날카로운 지적 통찰력",
+                weakness: "파티나 술자리에서 소외당하기 딱 좋은 성격",
+                best: "ENFP (상상의 장작을 공급해줌)",
+                worst: "ESFP (텐션이 맞닿지 않아 고통스러움)",
+                score: 20
+            },
+            "ISTP": {
+                title: "귀찮음 만렙 드립 사냥꾼 🎯",
+                subtitle: "드립 듣고 1초 쳐다본 뒤 제 갈 길 감",
+                description: "당신은 세상 모든 것이 귀찮지만, 가끔 꽂히는 아재개그를 단 한 단어로 무심하게 툭 던지고 자리를 뜹니다. 그게 너무 시크하고 파괴력이 강해서 사람들에게 강렬한 전율을 남기는 전형적인 방랑형 고수입니다.",
+                strength: "쿨함 속에 숨겨진 고밀도 한방 개그",
+                weakness: "리액션해 줘도 무표정이라 반응 재미없음",
+                best: "ESFJ (대신 텐션을 높여주는 천사)",
+                worst: "ESTJ (기강 잡으려 드는 상사 스타일)",
+                score: 50
+            },
+            "ISFP": {
+                title: "방구석 나홀로 피식이 🛏️",
+                subtitle: "이불 속에서 아재개그 보며 이불킥함",
+                description: "남들 앞에서는 썰렁한 소리 안 하려고 조용히 입을 다물고 있지만, 침대에 누워서 인스타 릴스나 유튜브 쇼츠로 아재개그 모음집을 보며 혼자 꺽꺽 웃으며 숨넘어가는 이중생활을 즐기는 귀여운 집순이/집돌이입니다.",
+                strength: "속으로 엄청난 개그 감성을 간직함",
+                weakness: "현장에서는 수줍음 때문에 입을 닫아버림",
+                best: "ENFJ (말문을 열어주는 리더)",
+                worst: "ENTJ (일방적인 소통 압박꾼)",
+                score: 35
+            },
+            "INFP": {
+                title: "망상 폭발 감성 드립 소설가 📝",
+                subtitle: "아재개그 하나로 우주 판타지 소설 집필",
+                description: "아재개그가 가진 쓸쓸하고 썰렁한 면에 기묘하게 감정이입하여 '아... 참기름도 고소당했을 때 외로웠겠지?' 하고 새벽 감성에 젖는 엉뚱하고 따뜻한 영혼입니다. 리액션 또한 가장 다정하고 정성스럽게 해 줍니다.",
+                strength: "놀라운 상상력과 세상 모든 드립에 대한 포용력",
+                weakness: "혼자 구석에서 상처받고 삐치기 대장",
+                best: "ENFJ (따뜻하게 안아주는 멘토)",
+                worst: "ESTJ (효율성만 따지는 차가운 현실주의자)",
+                score: 55
+            },
+            "INTP": {
+                title: "방구석 아인슈타인 🧪",
+                subtitle: "아재개그의 도파민 분석 전문가",
+                description: "당신은 매우 독립적이며 남들의 시선은 조금도 신경 쓰지 않습니다. 본인이 진짜 꽂힌 킹받는 인문학/과학 말장난만 집요하게 찾아다니며, 이해하는 사람 단 한 명만 있어도 세상을 다 가진 듯 흥분하여 설명충으로 빙의합니다.",
+                strength: "깊이 있고 지적인 (하지만 썰렁한) 고급 개그",
+                weakness: "지나치게 마이너해서 대중성이 전혀 없음",
+                best: "ENTJ (지적 자극을 함께 나누는 자)",
+                worst: "ESFJ (이론적인 이야기 극도로 지루해함)",
+                score: 48
+            }
+        };
+
+        // '오늘의 아재개그' 데이터베이스
+        const ajaeJokes = [
+            { q: "세상에서 가장 야한 채소는?", a: "버섯! 🍄" },
+            { q: "참기름이 법정에 고소당한 이유는?", a: "고소해서! ⚖️" },
+            { q: "소가 계단을 올라간다를 세 글자로 하면?", a: "소오름! 🐂" },
+            { q: "왕이 넘어지면 세 글자로?", a: "킹콩! 🦍" },
+            { q: "세상에서 가장 가난한 왕은?", a: "최저임금! 👑" },
+            { q: "비행기가 하늘을 가다가 툭 떨어지는 소리는?", a: "윙~ 철커덕 (윙 바디) ✈️" },
+            { q: "신데렐라가 잠을 못 자면?", a: "모짜렐라! 🧀" },
+            { q: "딸기가 직장 잃으면?", a: "딸기시럽(실업)! 🍓" },
+            { q: "구두가 화가 나면 뭐라고 할까?", a: "구두룡(드래곤)! 🐉" },
+            { q: "오리가 얼면?", a: "언덕! 🦆" },
+            { q: "세상에서 가장 뜨거운 과일은?", a: "천혜향! (천도 복숭아 아님) 🍊" },
+            { q: "사과가 웃으면?", a: "풋사과! 🍏" },
+            { q: "우유가 아프면?", a: "앙팡! 🥛" },
+            { q: "자가용의 반댓말은?", a: "커용! 🚗" },
+            { q: "설탕이 울면?", a: "당황! 🧂" },
+            { q: "푸가 여러 명 있으면?", a: "푸들! 🐕" }
+        ];
+
+        // 상태 변수
+        let currentIdx = 0;
+        let scoreMap = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+        let answerHistory = []; // 뒤로 가기를 위한 저장소
+
+        // 테스트 시작
+        function startTest() {
+            playSound('bounce');
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // 질문 렌더링
+        function renderQuestion() {
+            if (currentIdx >= questions.length) {
+                showLoading();
+                return;
+            }
+
+            const q = questions[currentIdx];
+            document.getElementById('question-index').innerText = `Q. ${currentIdx + 1} / ${questions.length}`;
+            
+            // 게이지 바 업데이트
+            const progressPercent = ((currentIdx + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // 질문 텍스트 및 옵션 주입
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('option-a').innerText = q.optionA;
+            document.getElementById('option-b').innerText = q.optionB;
+
+            // 이전 버튼 상태 제어
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentIdx === 0) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('opacity-50');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('opacity-50');
+            }
+        }
+
+        // 답변 선택
+        function selectAnswer(option) {
+            playSound('click');
+            const currentQ = questions[currentIdx];
+            const dimension = currentQ.dimension; // e.g., 'EI'
+
+            // 스코어링 반영
+            let typeSelected = '';
+            if (option === 'A') {
+                typeSelected = dimension[0]; // E, S, T, J
+            } else {
+                typeSelected = dimension[1]; // I, N, F, P
+            }
+
+            scoreMap[typeSelected]++;
+            answerHistory.push(typeSelected);
+
+            currentIdx++;
+            renderQuestion();
+        }
+
+        // 뒤로 가기 기능
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                playSound('bounce');
+                currentIdx--;
+                const lastSelectedType = answerHistory.pop();
+                scoreMap[lastSelectedType]--;
+                renderQuestion();
+            }
+        }
+
+        // 결과 연산 및 로딩 연출
+        function showLoading() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            const loadingTips = [
+                "부장님 연령대 세포 소환 중...",
+                "이 대리는 왜 정색하는가? 분석 중...",
+                "참기름 고소 냄새 솔솔 분석 중...",
+                "신데렐라 모짜렐라 숙성 완료 중...",
+                "당신의 뇌에 아재 감성 한 스푼 투하 중..."
+            ];
+
+            let tipIdx = 0;
+            const tipInterval = setInterval(() => {
+                if (document.getElementById('loading-screen').classList.contains('hidden')) {
+                    clearInterval(tipInterval);
+                    return;
+                }
+                document.getElementById('loading-tip').innerText = `"${loadingTips[tipIdx % loadingTips.length]}"`;
+                tipIdx++;
+            }, 800);
+
+            // 2.5초 후 결과 화면 노출
+            setTimeout(() => {
+                clearInterval(tipInterval);
+                calculateAndShowResult();
+            }, 2500);
+        }
+
+        // MBTI 계산
+        function calculateAndShowResult() {
+            let mbti = "";
+            mbti += (scoreMap['E'] >= scoreMap['I']) ? "E" : "I";
+            mbti += (scoreMap['S'] >= scoreMap['N']) ? "S" : "N";
+            mbti += (scoreMap['T'] >= scoreMap['F']) ? "T" : "F";
+            mbti += (scoreMap['J'] >= scoreMap['P']) ? "J" : "P";
+
+            const result = mbtiResults[mbti] || mbtiResults["ESTJ"]; // 만약 대비용 예외 처리
+
+            // 사운드
+            playSound('success');
+
+            // 돔 주입
+            document.getElementById('result-mbti').innerText = mbti;
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-subtitle').innerText = result.subtitle;
+            document.getElementById('result-description').innerText = result.description;
+            document.getElementById('result-strength').innerText = result.strength;
+            document.getElementById('result-weakness').innerText = result.weakness;
+            document.getElementById('result-best').innerText = result.best;
+            document.getElementById('result-worst').innerText = result.worst;
+
+            // 스탯 바 적용
+            document.getElementById('result-stat-percent').innerText = `${result.score}%`;
+            document.getElementById('result-stat-bar').style.width = `${result.score}%`;
+
+            let comment = "";
+            if (result.score >= 90) {
+                comment = "🚨 경보! 당신은 이미 인간 아재 그 자체입니다.";
+            } else if (result.score >= 70) {
+                comment = "😂 부장님의 신임을 한몸에 받을 훌륭한 인재입니다.";
+            } else if (result.score >= 50) {
+                comment = "😎 가끔 이불 속에서 피식하는 건강한 아재 감성입니다.";
+            } else {
+                comment = "🛡️ 축하합니다! 당신은 썰렁함을 방어하는 철벽 방어막입니다.";
+            }
+            document.getElementById('result-stat-comment').innerText = comment;
+
+            // 아재개그 발전기 초기 렌더
+            generateJoke();
+
+            // 화면 전환
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
+        // 아재개그 랜덤 픽업
+        function generateJoke() {
+            playSound('click');
+            const randomJoke = ajaeJokes[Math.floor(Math.random() * ajaeJokes.length)];
+            
+            document.getElementById('joke-question').innerText = `Q. ${randomJoke.q}`;
+            document.getElementById('joke-answer').innerText = `A. ${randomJoke.a}`;
+            
+            // 답변 숨김 상태로 초기화
+            document.getElementById('joke-answer').classList.add('hidden');
+            document.getElementById('joke-answer-btn').classList.remove('hidden');
+        }
+
+        // 아재개그 정답 보기
+        function revealJokeAnswer() {
+            playSound('bounce');
+            document.getElementById('joke-answer').classList.remove('hidden');
+            document.getElementById('joke-answer-btn').classList.add('hidden');
+        }
+
+        // 결과 링크 공유하기
+        function shareLink() {
+            playSound('click');
+            // 클립보드 복사 API 대용 execCommand (안전망)
+            const dummy = document.createElement('input');
+            const text = window.location.href;
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            // 커스텀 토스트 알림 노출
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }
+
+        // 테스트 다시하기 초기화
+        function restartTest() {
+            playSound('bounce');
+            currentIdx = 0;
+            scoreMap = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            answerHistory = [];
+            
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
