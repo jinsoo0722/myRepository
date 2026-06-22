@@ -86,9 +86,28 @@ with tab2:
     st.subheader("전체 대시보드")
     df = load_data()
     if not df.empty:
+        # 요약 지표
+        total_amount = df['amount'].sum()
+        cat_group = df.groupby('category')['amount'].sum()
+        top_cat = cat_group.idxmax() if not cat_group.empty else "-"
+        
         c1, c2, c3 = st.columns(3)
-        c1.metric("전체 누적 사용액", f"{df['amount'].sum():,.0f}원")
-        # 키값이 'category'이므로 'category'로 그룹화
-        cat_sum = df.groupby('category')['amount'].sum().reset_index()
-        fig = px.pie(cat_sum, values='amount', names='category', hole=0.5)
-        st.plotly_chart(fig, use_container_width=True)
+        c1.metric("전체 누적 사용액", f"{total_amount:,.0f}원")
+        c2.metric("최대 사용 항목", f"{top_cat}")
+        c3.metric("총 데이터 건수", f"{len(df)}건")
+        
+        st.divider()
+        
+        # 차트 영역
+        chart_col1, chart_col2 = st.columns(2)
+        with chart_col1:
+            st.markdown("##### 🏠 항목별 예산 분포")
+            fig = px.pie(df, values='amount', names='category', hole=0.5)
+            st.plotly_chart(fig, use_container_width=True)
+        with chart_col2:
+            st.markdown("##### 👥 팀원별 누적 사용액")
+            mem_sum = df.groupby('member')['amount'].sum().reset_index()
+            fig_bar = px.bar(mem_sum, x='member', y='amount')
+            st.plotly_chart(fig_bar, use_container_width=True)
+    else:
+        st.info("데이터가 없습니다.")
