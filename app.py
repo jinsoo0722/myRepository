@@ -30,17 +30,29 @@ def load_data():
         st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
         return pd.DataFrame(columns=['id', 'month', 'member', 'category', 'amount', 'timestamp'])
 
-def save_data(data):
-    if "YOUR_APPS_SCRIPT" in APPS_SCRIPT_URL or not APPS_SCRIPT_URL.startswith("http"):
-        st.warning("먼저 소스 코드 상단의 APPS_SCRIPT_URL을 설정해주세요.")
-        return False
+def save_data(date_str, member, category, amount):
+    # 앱스 스크립트가 요구하는 구조로 변경
+    payload = {
+        "action": "insert",
+        "data": {
+            "id": int(datetime.datetime.now().timestamp() * 1000),
+            "month": date_str,
+            "member": member,
+            "category": category,
+            "amount": amount
+        }
+    }
     try:
-        response = requests.post(APPS_SCRIPT_URL, json=data)
-        if response.status_code == 200 and response.json().get('status') == 'success':
+        response = requests.post(API_URL, json=payload)
+        if response.status_code == 200 and response.json().get("status") == "success":
+            st.success("데이터가 성공적으로 저장되었습니다!")
+            st.cache_data.clear()
             return True
-        return False
+        else:
+            st.error(f"저장 실패: {response.text}")
+            return False
     except Exception as e:
-        st.error(f"데이터 저장 중 오류가 발생했습니다: {e}")
+        st.error(f"저장 중 오류 발생: {e}")
         return False
 
 # --- UI 레이아웃 ---
