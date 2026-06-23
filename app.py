@@ -35,30 +35,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# [DATA LOADING & PROCESSING FUNCTIONS]
+# [CORE FUNCTIONS]
 # -----------------------------------------------------------------------------
-DATASET_NAME = "CWRU Bearing Dataset"
-DATASET_URL = "https://www.kaggle.com/datasets/brjapon/cwru-bearing-datasets?resource=download"
-NORMAL_FILE = "Time_Normal_1_098.mat"  # 파일 경로에 맞게 수정 필요
-FAULT_FILE = "B007_1_123.mat"       # 파일 경로에 맞게 수정 필요
-FS = 12000  
-
-@st.cache_data
-def load_vibration_data(normal_file, fault_file):
-    # 테스트용 가상 데이터 생성 로직 (파일이 없을 때를 대비한 안전장치)
-    if not os.path.exists(normal_file) or not os.path.exists(fault_file):
-        t = np.linspace(0, 1, FS)
-        normal = np.sin(2 * np.pi * 60 * t) + np.random.normal(0, 0.2, FS)
-        fault = np.sin(2 * np.pi * 60 * t) + np.random.normal(0, 0.8, FS)
-        # 특정 구간에 충격 신호 추가 (지표 변화 확인용)
-        fault[3000:3500] += np.random.normal(0, 3.0, 500)
-        return normal, fault
-    
-    mat_normal = loadmat(normal_file)
-    mat_fault = loadmat(fault_file)
-    normal_signal = mat_normal["X098_DE_time"].ravel() 
-    fault_signal = mat_fault["X123_DE_time"].ravel() 
-    return normal_signal, fault_signal
+def get_vibration_array(mat_data):
+    """MAT 파일 내에서 'DE_time'이 포함된 변수를 찾아 자동 추출"""
+    for key in mat_data.keys():
+        if "DE_time" in key:  
+            return mat_data[key].ravel()
+    return None
 
 def calculate_features(signal):
     signal = np.asarray(signal).ravel()
@@ -80,7 +64,6 @@ def calculate_features(signal):
         "mean_abs": mean_abs,
     }
 
-@st.cache_data
 def get_feature_df(normal_s, fault_s):
     return pd.DataFrame([
         {"state": "normal", **calculate_features(normal_s)},
@@ -100,7 +83,6 @@ def window_features(signal, fs, window_sec=0.2, step_sec=0.1):
         })
     return pd.DataFrame(rows)
 
-@st.cache_data
 def get_trend_df(normal_s, fault_s, fs):
     normal_win = window_features(normal_s, fs)
     fault_win = window_features(fault_s, fs)
@@ -144,167 +126,170 @@ def plot_fft(signal, fs, title, max_freq=1000, color='#1f77b4'):
     return fig
 
 # -----------------------------------------------------------------------------
-# [CORE LOGIC EXECUTION (순서 정렬로 에러 방지)]
-# -----------------------------------------------------------------------------
-# 1. 데이터 로드 및 특징량 계산 완료하기
-normal_signal, fault_signal = load_vibration_data(NORMAL_FILE, FAULT_FILE)
-feature_df = get_feature_df(normal_signal, fault_signal)
-trend_df, normal_win, fault_win = get_trend_df(normal_signal, fault_signal, FS)
-
-# 2. 임계치 정의 및 진단 수행
-normal_baseline = normal_win[["rms", "kurtosis", "crest_factor"]].agg(["mean", "std"])
-rms_threshold = normal_baseline.loc["mean", "rms"] + 3 * normal_baseline.loc["std", "rms"]
-kurtosis_threshold = 5.0
-crest_threshold = 4.0
-
-def diagnose(row):
-    reasons = []
-    if row["rms"] > rms_threshold: reasons.append("RMS 증가")
-    if row["kurtosis"] > kurtosis_threshold: reasons.append("충격성 증가")
-    if row["crest_factor"] > crest_threshold: reasons.append("Crest Factor 증가")
-
-    if len(reasons) >= 2: return "위험", ", ".join(reasons)
-    if len(reasons) == 1: return "주의", reasons[0]
-    return "정상", "-"
-
-diagnosis_df = fault_win.copy()
-diagnosis_df[["diagnosis", "reason"]] = diagnosis_df.apply(lambda row: pd.Series(diagnose(row)), axis=1)
-
-# 상단 대시보드 스코어보드용 변수 추출
-normal_rms = feature_df.loc[feature_df.state=="normal", "rms"].iloc[0]
-fault_rms = feature_df.loc[feature_df.state=="fault", "rms"].iloc[0]
-danger_count = len(diagnosis_df[diagnosis_df["diagnosis"]=="위험"])
-
-# -----------------------------------------------------------------------------
-# [SIDEBAR UI]
+# [SIDEBAR UI & FILE UPLOADER]
 # -----------------------------------------------------------------------------
 with st.sidebar:
-    st.header("⚙️ Analysis Setting")
-    st.info(f"**Dataset:**\n{DATASET_NAME}\n\n**Sampling Rate:**\n{FS:,} Hz")
+    st.header("📂 데이터 파일 업로드")
+    st.info("CWRU 데이터셋(.mat) 파일을 각각 업로드하세요.")
+    
+    # 파일 업로더 컴포넌트 추가
+    uploaded_normal = st.file_uploader("정상 상태(.mat) 파일 선택", type=["mat"])
+    uploaded_fault = st.file_uploader("이상 상태(.mat) 파일 선택", type=["mat"])
+    
+    st.divider()
+    FS = st.number_input("샘플링 주파수 (Hz)", value=12000, step=1000)
+    
     st.divider()
     st.subheader("📊 Diagnosis Threshold")
-    st.markdown(f"""
-    - **RMS** : Mean + 3σ (`{rms_threshold:.4f}`)
-    - **Kurtosis** : `{kurtosis_threshold}`
-    - **Crest Factor** : `{crest_threshold}`
-    """)
+    kurtosis_threshold = st.slider("Kurtosis 임계치", 2.0, 10.0, 5.0)
+    crest_threshold = st.slider("Crest Factor 임계치", 2.0, 10.0, 4.0)
 
 # -----------------------------------------------------------------------------
-# [MAIN APP LAYOUT]
+# [MAIN APP LAYOUT & CONTROL FLOW]
 # -----------------------------------------------------------------------------
 st.title("⚙️ CBM 기반 설비 진동 이상 분석 시스템")
 st.caption("Condition Based Maintenance | Bearing Fault Detection Dashboard")
 
-# 메인 지표 현황판 (가장 상단 배치로 시인성 확보)
-st.write("---")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("정상 신호 RMS", f"{normal_rms:.4f}")
-c2.metric("이상 신호 RMS", f"{fault_rms:.4f}", delta=f"{fault_rms-normal_rms:.4f}", delta_color="inverse")
-c3.metric("위험 감지 구간", f"{danger_count}개", delta="- 정상 구간 제외" if danger_count > 0 else "안정")
-c4.metric("분석 데이터 크기", f"{len(fault_signal):,} pts")
-st.write("---")
-
-# 탭 구성 적용하여 화면을 깔끔하게 분할
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Overview & Features", 
-    "📈 Signal Analysis (Time)", 
-    "🌊 Frequency Analysis (FFT)", 
-    "🚨 AI Diagnosis & CBM"
-])
-
-# -----------------------------------------------------------------------------
-# TAB 1: OVERVIEW & FEATURES
-# -----------------------------------------------------------------------------
-with tab1:
-    st.subheader("1. 데이터셋 및 분석 요약")
-    col_info1, col_info2 = st.columns([2, 1])
-    with col_info1:
-        st.markdown(f"""
-        - **분석 대상 데이터:** {DATASET_NAME}
-        - **데이터 출처:** [Kaggle Dataset 링크]({DATASET_URL})
-        - **신호 샘플링 스펙:** {FS:,} Hz (초당 {FS:,}개 데이터 수집)
-        """)
-    with col_info2:
-        st.success("✅ 파일 매핑 성공 및 특징량 정규화 완료")
-
-    st.subheader("2. 시간 영역 통계적 특징값 비교")
-    st.dataframe(feature_df.style.highlight_max(axis=0, subset=['rms', 'peak', 'kurtosis', 'crest_factor'], color='#ffeae8'))
+# 두 파일이 모두 업로드 되었을 때만 시각화 및 분석을 수행
+if uploaded_normal and uploaded_fault:
     
-    # 통계치 바 차트 시각화
-    plot_cols = ["rms", "peak", "kurtosis", "crest_factor"]
-    feature_plot_df = feature_df.melt(id_vars="state", value_vars=plot_cols, var_name="Feature", value_name="Value")
-    fig_bar = px.bar(feature_plot_df, x="Feature", y="Value", color="state", barmode="group",
-                     title="정상/이상 상태별 통계 지표 비교", template="plotly_white",
-                     color_discrete_map={'normal': '#2563eb', 'fault': '#dc2626'})
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-# -----------------------------------------------------------------------------
-# TAB 2: SIGNAL ANALYSIS (TIME)
-# -----------------------------------------------------------------------------
-with tab2:
-    st.subheader("3. 시간 영역 원시 신호 (Raw Waveform) 비교")
-    st.caption("초기 0.2초 구간의 진동 파형 형태 분석")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.plotly_chart(plot_time_waveform(normal_signal, FS, "정상 진동 파형", color='#2563eb'), use_container_width=True)
-    with col2:
-        st.plotly_chart(plot_time_waveform(fault_signal, FS, "이상 진동 파형", color='#dc2626'), use_container_width=True)
+    # 1. 파일 객체로부터 데이터 로드 및 시그널 추출
+    with st.spinner("MAT 파일 읽는 중..."):
+        mat_normal = loadmat(uploaded_normal)
+        mat_fault = loadmat(uploaded_fault)
         
-    st.subheader("4. 구간별(Windowing) 특징값 트렌드 추세 분석")
-    st.caption("0.2초 윈도우 크기로 실시간 상태 변화 트렌드를 시뮬레이션합니다.")
-    
-    for col in ["rms", "kurtosis", "crest_factor"]:
-        fig_trend = px.line(trend_df, x="time_sec", y=col, color="state",
-                            title=f"시간 경과에 따른 {col.upper()} 지표 추세 분석", template="plotly_white",
-                            color_discrete_map={'normal': '#2563eb', 'fault': '#dc2626'})
-        st.plotly_chart(fig_trend, use_container_width=True)
+        normal_signal = get_vibration_array(mat_normal)
+        fault_signal = get_vibration_array(mat_fault)
+        
+    if normal_signal is None or fault_signal is None:
+        st.error("❌ 파일 내에서 'DE_time' 변수를 찾을 수 없습니다. 올바른 CWRU 데이터셋 형식인지 확인해 주세요.")
+        st.stop()
 
-# -----------------------------------------------------------------------------
-# TAB 3: FREQUENCY ANALYSIS (FFT)
-# -----------------------------------------------------------------------------
-with tab3:
-    st.subheader("5. 주파수 영역 (FFT) 스펙트럼 분석")
-    st.caption("진동 신호를 주파수 성분으로 분해하여 결함 성분 주파수(Fault Frequency)를 관찰합니다. (주요 관심 영역: 0 ~ 1,000 Hz)")
-    col1_fft, col2_fft = st.columns(2)
-    with col1_fft:
-        st.plotly_chart(plot_fft(normal_signal, FS, "정상 신호 주파수 스펙트럼", color='#2563eb'), use_container_width=True)
-    with col2_fft:
-        st.plotly_chart(plot_fft(fault_signal, FS, "이상 신호 주파수 스펙트럼", color='#dc2626'), use_container_width=True)
+    # 2. 통계치 및 트렌드 계산
+    feature_df = get_feature_df(normal_signal, fault_signal)
+    trend_df, normal_win, fault_win = get_trend_df(normal_signal, fault_signal, FS)
 
-# -----------------------------------------------------------------------------
-# TAB 4: DIAGNOSIS & CBM
-# -----------------------------------------------------------------------------
-with tab4:
-    st.subheader("6. 룰 기반 알고리즘 상태 진단 결과")
-    
-    col_res1, col_res2 = st.columns([2, 1])
-    with col_res1:
-        st.write("#### 📋 샘플 구간 진단 리스트 (최상위 20개 구간)")
+    # 3. 규칙 기반 진단 임계치 동적 적용
+    normal_baseline = normal_win[["rms", "kurtosis", "crest_factor"]].agg(["mean", "std"])
+    rms_threshold = normal_baseline.loc["mean", "rms"] + 3 * normal_baseline.loc["std", "rms"]
+
+    def diagnose(row):
+        reasons = []
+        if row["rms"] > rms_threshold: reasons.append("RMS 증가")
+        if row["kurtosis"] > kurtosis_threshold: reasons.append("충격성 증가")
+        if row["crest_factor"] > crest_threshold: reasons.append("Crest Factor 증가")
+
+        if len(reasons) >= 2: return "위험", ", ".join(reasons)
+        if len(reasons) == 1: return "주의", reasons[0]
+        return "정상", "-"
+
+    diagnosis_df = fault_win.copy()
+    diagnosis_df[["diagnosis", "reason"]] = diagnosis_df.apply(lambda row: pd.Series(diagnose(row)), axis=1)
+
+    # 4. 스코어보드 변수 매핑
+    normal_rms = feature_df.loc[feature_df.state=="normal", "rms"].iloc[0]
+    fault_rms = feature_df.loc[feature_df.state=="fault", "rms"].iloc[0]
+    danger_count = len(diagnosis_df[diagnosis_df["diagnosis"]=="위험"])
+
+    # 5. 상단 실시간 메트릭 표시
+    st.write("---")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("정상 신호 RMS", f"{normal_rms:.4f}")
+    c2.metric("이상 신호 RMS", f"{fault_rms:.4f}", delta=f"{fault_rms-normal_rms:.4f}", delta_color="inverse")
+    c3.metric("위험 감지 구간", f"{danger_count}개")
+    c4.metric("Sampling Rate", f"{FS:,} Hz")
+    st.write("---")
+
+    # 6. 탭 레이아웃 렌더링
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📊 Overview",
+        "📈 Signal Analysis",
+        "🌊 Frequency",
+        "🚨 Diagnosis"
+    ])
+
+    # --- TAB 1: OVERVIEW ---
+    with tab1:
+        st.header("1. 데이터셋 및 분석 요약")
+        st.markdown(f"- **업로드된 정상 파일:** `{uploaded_normal.name}` ({len(normal_signal):,} 포인트)")
+        st.markdown(f"- **업로드된 이상 파일:** `{uploaded_fault.name}` ({len(fault_signal):,} 포인트)")
+        
+        st.header("2. 시간 영역 특징값 비교")
+        st.dataframe(feature_df.style.highlight_max(axis=0, subset=['rms', 'peak', 'kurtosis', 'crest_factor'], color='#ffeae8'))
+
+        plot_cols = ["rms", "peak", "kurtosis", "crest_factor"]
+        feature_plot_df = feature_df.melt(id_vars="state", value_vars=plot_cols, var_name="Feature", value_name="Value")
+        fig_bar = px.bar(feature_plot_df, x="Feature", y="Value", color="state", barmode="group",
+                         title="정상/이상 특징값 비교", template="plotly_white",
+                         color_discrete_map={'normal': '#2563eb', 'fault': '#dc2626'})
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    # --- TAB 2: SIGNAL ANALYSIS ---
+    with tab2:
+        st.header("3. 시간 영역 파형 비교 (초기 0.2초)")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(plot_time_waveform(normal_signal, FS, "정상 진동 신호", color='#2563eb'), use_container_width=True)
+        with col2:
+            st.plotly_chart(plot_time_waveform(fault_signal, FS, "이상 진동 신호", color='#dc2626'), use_container_width=True)
+
+        st.header("4. 구간별 특징값 추세 분석")
+        for col in ["rms", "kurtosis", "crest_factor"]:
+            fig_trend = px.line(trend_df, x="time_sec", y=col, color="state", title=f"구간별 {col.upper()} 추세",
+                                template="plotly_white", color_discrete_map={'normal': '#2563eb', 'fault': '#dc2626'})
+            st.plotly_chart(fig_trend, use_container_width=True)
+
+    # --- TAB 3: FREQUENCY ---
+    with tab3:
+        st.header("5. 주파수 영역 분석 (FFT)")
+        col1_fft, col2_fft = st.columns(2)
+        with col1_fft:
+            st.plotly_chart(plot_fft(normal_signal, FS, "정상 신호 FFT", color='#2563eb'), use_container_width=True)
+        with col2_fft:
+            st.plotly_chart(plot_fft(fault_signal, FS, "이상 신호 FFT", color='#dc2626'), use_container_width=True)
+
+    # --- TAB 4: DIAGNOSIS ---
+    with tab4:
+        st.header("6. 규칙 기반 상태진단")
+        st.subheader("진단 결과 (이상 신호 구간 분석)")
         st.dataframe(diagnosis_df[["time_sec", "rms", "kurtosis", "crest_factor", "diagnosis", "reason"]].head(20))
-    with col_res2:
-        st.write("#### 📊 진단 스태티스틱스 요약")
-        counts = diagnosis_df["diagnosis"].value_counts()
-        fig_pie = px.pie(values=counts.values, names=counts.index, title="전체 구간 상태 비율",
-                         color=counts.index, color_discrete_map={'정상': '#10b981', '주의': '#f59e0b', '위험': '#ef4444'})
-        st.plotly_chart(fig_pie, use_container_width=True)
+        
+        col_summary1, col_summary2 = st.columns([1, 1])
+        with col_summary1:
+            st.write("### 📊 진단 요약 수량")
+            st.write(diagnosis_df["diagnosis"].value_counts())
+        with col_summary2:
+            counts = diagnosis_df["diagnosis"].value_counts()
+            fig_pie = px.pie(values=counts.values, names=counts.index, title="전체 구간 상태 비율",
+                             color=counts.index, color_discrete_map={'정상': '#10b981', '주의': '#f59e0b', '위험': '#ef4444'})
+            st.plotly_chart(fig_pie, use_container_width=True)
 
-    st.subheader("7. CBM(상태기반정비) 관점의 의사결정 권고안")
+        st.header("7. CBM 관점의 의사결정")
+        summary = f'''
+        ### 💡 분석 결과 요약 및 CBM 해석
+        - **정상 RMS:** `{feature_df.loc[feature_df['state']=='normal', 'rms'].iloc[0]:.4f}` / **이상 RMS:** `{feature_df.loc[feature_df['state']=='fault', 'rms'].iloc[0]:.4f}`
+        - **정상 Kurtosis:** `{feature_df.loc[feature_df['state']=='normal', 'kurtosis'].iloc[0]:.4f}` / **이상 Kurtosis:** `{feature_df.loc[feature_df['state']=='fault', 'kurtosis'].iloc[0]:.4f}`
+        - **정상 Crest Factor:** `{feature_df.loc[feature_df['state']=='normal', 'crest_factor'].iloc[0]:.4f}` / **이상 Crest Factor:** `{feature_df.loc[feature_df['state']=='fault', 'crest_factor'].iloc[0]:.4f}`
+
+        ### 📋 적용된 알람 임계치
+        - **RMS 주의 임계치 (정상 Mean + 3σ):** `{rms_threshold:.4f}`
+        - **Kurtosis 임계치:** `{kurtosis_threshold}` | **Crest Factor 임계치:** `{crest_threshold}`
+
+        ### 🛠 CBM 작업 권고안
+        입력된 데이터 분석 결과, 이상 파일에서 전체적인 진동 에너지(RMS)와 급격한 충격 발생 빈도(Kurtosis)가 임계치를 초과하는 구간이 **{danger_count}개** 확인되었습니다.
+        현장 운전 중 `RMS 가 {rms_threshold:.4f} 이상`으로 관찰되는 상태가 지속되면 설비 마모 및 손상이 심화되고 있음을 의미하므로 즉각적인 **현장 정비(Work Order)** 작성을 권고합니다.
+        '''
+        st.markdown(summary)
+
+else:
+    # 7. 파일이 업로드되지 않았을 때 표출되는 대기 대시보드 화면
+    st.warning("👈 왼쪽 사이드바에서 정상 상태와 이상 상태의 (.mat) 데이터를 업로드해 주세요.")
     
-    summary = f'''
-    ### 📌 핵심 지표 요약
-    - **RMS (진동 에너지 요약):** 정상 `{feature_df.loc[feature_df['state']=='normal', 'rms'].iloc[0]:.4f}` → 이상 `{feature_df.loc[feature_df['state']=='fault', 'rms'].iloc[0]:.4f}` (이상 발생 시 에너지 급증)
-    - **Kurtosis (첨도/충격성):** 정상 `{feature_df.loc[feature_df['state']=='normal', 'kurtosis'].iloc[0]:.4f}` → 이상 `{feature_df.loc[feature_df['state']=='fault', 'kurtosis'].iloc[0]:.4f}`
-    - **Crest Factor (충격비):** 정상 `{feature_df.loc[feature_df['state']=='normal', 'crest_factor'].iloc[0]:.4f}` → 이상 `{feature_df.loc[feature_df['state']=='fault', 'crest_factor'].iloc[0]:.4f}`
-
-    ### 🛠 설정된 CBM 판단 임계치 (Thresholds)
-    1. **RMS 경보 임계치:** `{rms_threshold:.4f}` (정상구간 평균 + 3σ 활용)
-    2. **Kurtosis(충격성) 경보 기준:** `{kurtosis_threshold}` (베어링 초기 결함 검출용 고정 지표)
-    3. **Crest Factor 경보 기준:** `{crest_threshold}` 
-
-    ### 💡 CBM 종합 의견 및 작업 지시 가이드
-    본 분석 시스템에서 베어링 결함 신호를 입력받은 결과, **RMS**와 **Crest Factor**가 위험 수준을 동시 혹은 지속적으로 초과하는 구간이 총 **{danger_count}개** 검출되었습니다. 
+    st.markdown("""
+    ### ⚙️ CBM 대시보드 사용 가이드
+    본 시스템은 **CWRU 베어링 데이터셋(.mat)**을 직접 업로드하여 설비의 결함 상태를 실시간으로 진단하는 상태기반정비(CBM) 시스템입니다.
     
-    1. **현장 정비 가이드:** 특정 윈도우 구간에서 `RMS가 {rms_threshold:.4f}`를 초과하고 `Crest Factor가 {crest_threshold}`를 넘어서는 현상이 3회 이상 연속될 경우 현장 설비에 대한 **'예방 정비 및 상세 현장 점검 지시(Work Order)'**를 발행할 것을 권장합니다.
-    2. **향후 고도화 방안:** 향후 실시간 CBM 시스템 운영 시에는 단순히 통계치 임계값 제어뿐만 아니라 회전체 속도(RPM) 및 부하(Load) 변화를 반영한 동적 임계치(Dynamic Baseline) 설계가 필수적입니다.
-    '''
-    st.markdown(summary)
+    1. **사이드바 파일 업로드:** 왼쪽 사이드바에서 정상 데이터와 이상 데이터를 각각 드래그 앤 드롭합니다.
+    2. **샘플링 주파수 확인:** 데이터 수집 규격에 맞춰 주파수 값을 입력합니다. (CWRU 기본: 12,000 Hz)
+    3. **동적 분석 수행:** 파일이 업로드되면 자동으로 시간/주파수 도메인 특징량을 계산하고 룰 기반 AI 진단 결과를 탭 메뉴로 제공합니다.
+    """)
