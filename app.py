@@ -2,26 +2,14 @@ import os
 import math
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import streamlit as st
+import plotly.express as px
 
 from scipy import stats
 from scipy.fft import rfft, rfftfreq
 
 from scipy.io import loadmat
-
-## 폰트 설정
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-
-font_candidates = [
-    "Malgun Gothic",      # Windows
-    "AppleGothic",        # macOS
-    "NanumGothic",        # Linux/일부 환경
-    "Noto Sans CJK KR",   # Linux
-]
-
-available_fonts = {f.name for f in fm.fontManager.ttflist}
 
 for font in font_candidates:
     if font in available_fonts:
@@ -67,21 +55,39 @@ st.write(f"이상 신호 크기: {fault_signal.shape}")
 # 3. 시간 영역 파형 비교 함수
 def plot_time_waveform(signal, fs, title, seconds=0.2):
     n = min(len(signal), int(fs * seconds))
-    x = np.arange(n) / fs
-    fig, ax = plt.subplots(figsize=(10, 3))
-    ax.plot(x, signal[:n])
-    ax.set_title(title)
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Amplitude")
-    ax.grid(alpha=0.3)
+
+    df = pd.DataFrame({
+        "Time (s)": np.arange(n) / fs,
+        "Amplitude": signal[:n]
+    })
+
+    fig = px.line(
+        df,
+        x="Time (s)",
+        y="Amplitude",
+        title=title
+    )
+
+    fig.update_layout(
+        height=350
+    )
+
     return fig
 
 st.header("3. 시간 영역 파형 비교")
 col1, col2 = st.columns(2)
 with col1:
-    st.pyplot(plot_time_waveform(normal_signal, FS, "정상 진동 신호"))
+    # st.pyplot(plot_time_waveform(normal_signal, FS, "정상 진동 신호"))
+    st.plotly_chart(
+        plot_time_waveform(normal_signal, FS, "정상 진동 신호"),
+        use_container_width=True
+    )
 with col2:
-    st.pyplot(plot_time_waveform(fault_signal, FS, "이상 진동 신호"))
+    # st.pyplot(plot_time_waveform(fault_signal, FS, "이상 진동 신호"))
+    st.plotly_chart(
+        plot_time_waveform(fault_signal, FS, "이상 진동 신호"),
+        use_container_width=True
+    )
 
 
 # 4. 시간 영역 특징값 계산 함수
