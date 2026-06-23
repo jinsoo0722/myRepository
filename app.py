@@ -10,14 +10,24 @@ from scipy.fft import rfft, rfftfreq
 
 from scipy.io import loadmat
 
-import matplotlib.font_manager as fm
+## 폰트 설정
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 
-font_path = "fonts/NanumGothic.ttf"
+font_candidates = [
+    "Malgun Gothic",      # Windows
+    "AppleGothic",        # macOS
+    "NanumGothic",        # Linux/일부 환경
+    "Noto Sans CJK KR",   # Linux
+]
 
-font_prop = fm.FontProperties(fname=font_path)
+available_fonts = {f.name for f in fm.fontManager.ttflist}
 
-plt.rcParams["font.family"] = font_prop.get_name()
+for font in font_candidates:
+    if font in available_fonts:
+        plt.rcParams["font.family"] = font
+        break
+
 plt.rcParams["axes.unicode_minus"] = False
 
 # Streamlit 앱 제목 설정
