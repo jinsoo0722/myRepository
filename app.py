@@ -11,11 +11,6 @@ from scipy.fft import rfft, rfftfreq
 
 from scipy.io import loadmat
 
-for font in font_candidates:
-    if font in available_fonts:
-        plt.rcParams["font.family"] = font
-        break
-
 plt.rcParams["axes.unicode_minus"] = False
 
 # Streamlit 앱 제목 설정
