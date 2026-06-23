@@ -11,14 +11,14 @@ from scipy.fft import rfft, rfftfreq
 
 from scipy.io import loadmat
 
-plt.rcParams["axes.unicode_minus"] = False
+# plt.rcParams["axes.unicode_minus"] = False
 
 # Streamlit 앱 제목 설정
 st.set_page_config(layout="wide", page_title="설비 진동 데이터 이상 분석 대시보드")
 st.title("설비 진동 데이터 이상 분석 대시보드")
 
 # 0. 라이브러리 불러오기 및 설정 (필요시)
-plt.rcParams["axes.unicode_minus"] = False
+# plt.rcParams["axes.unicode_minus"] = False
 np.random.seed(42)
 
 # 1. 데이터셋 선택 (하드코딩 또는 사용자 입력)
@@ -119,13 +119,27 @@ st.header("4. 시간 영역 특징값 비교")
 st.dataframe(feature_df)
 
 plot_cols = ["rms", "peak", "kurtosis", "crest_factor"]
-fig_bar, ax_bar = plt.subplots(figsize=(10, 4))
-feature_df.set_index("state")[plot_cols].T.plot(kind="bar", figsize=(10, 4), ax=ax_bar)
-ax_bar.set_title("정상/이상 특징값 비교")
-ax_bar.set_ylabel("Feature value")
-ax_bar.tick_params(axis='x', labelrotation=0) # Corrected line: use tick_params for label rotation
-ax_bar.grid(axis="y", alpha=0.3)
-st.pyplot(fig_bar)
+
+feature_plot_df = feature_df.melt(
+    id_vars="state",
+    value_vars=plot_cols,
+    var_name="Feature",
+    value_name="Value"
+)
+
+fig_bar = px.bar(
+    feature_plot_df,
+    x="Feature",
+    y="Value",
+    color="state",
+    barmode="group",
+    title="정상/이상 특징값 비교"
+)
+
+st.plotly_chart(
+    fig_bar,
+    use_container_width=True
+)
 
 
 # 5. 주파수 영역 분석 함수
@@ -141,21 +155,31 @@ def compute_fft(signal, fs):
 def plot_fft(signal, fs, title, max_freq=1000):
     freq, spectrum = compute_fft(signal, fs)
     mask = freq <= max_freq
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(freq[mask], spectrum[mask])
-    ax.set_title(title)
-    ax.set_xlabel("Frequency (Hz)")
-    ax.set_ylabel("Amplitude")
-    ax.grid(alpha=0.3)
+    df = pd.DataFrame({
+        "Frequency (Hz)": freq[mask],
+        "Amplitude": spectrum[mask]
+    })
+    fig = px.line(
+        df,
+        x="Frequency (Hz)",
+        y="Amplitude",
+        title=title
+    )
     return fig
 
 st.header("5. 주파수 영역 분석")
 col1_fft, col2_fft = st.columns(2)
 with col1_fft:
-    st.pyplot(plot_fft(normal_signal, FS, "정상 신호 FFT"))
-with col2_fft:
-    st.pyplot(plot_fft(fault_signal, FS, "이상 신호 FFT"))
+    st.plotly_chart(
+        plot_fft(normal_signal, FS, "정상 신호 FFT"),
+        use_container_width=True
+    )
 
+with col2_fft:
+    st.plotly_chart(
+        plot_fft(fault_signal, FS, "이상 신호 FFT"),
+        use_container_width=True
+    )
 
 # 6. 구간별 특징값 추세 분석 함수
 def window_features(signal, fs, window_sec=0.2, step_sec=0.1):
@@ -182,16 +206,21 @@ def get_trend_df(normal_s, fault_s, fs):
 trend_df, normal_win, fault_win = get_trend_df(normal_signal, fault_signal, FS)
 
 st.header("6. 구간별 특징값 추세 분석")
+
 for col in ["rms", "kurtosis", "crest_factor"]:
-    fig_trend, ax_trend = plt.subplots(figsize=(10, 3))
-    for state, group in trend_df.groupby("state"):
-        ax_trend.plot(group["time_sec"], group[col], label=state)
-    ax_trend.set_title(f"구간별 {col} 추세")
-    ax_trend.set_xlabel("Time (s)")
-    ax_trend.set_ylabel(col)
-    ax_trend.legend()
-    ax_trend.grid(alpha=0.3)
-    st.pyplot(fig_trend)
+
+    fig_trend = px.line(
+        trend_df,
+        x="time_sec",
+        y=col,
+        color="state",
+        title=f"구간별 {col} 추세"
+    )
+
+    st.plotly_chart(
+        fig_trend,
+        use_container_width=True
+    )
 
 
 # 7. 규칙 기반 상태진단 기준 제안 및 적용
