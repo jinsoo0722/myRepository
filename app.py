@@ -10,6 +10,16 @@ from scipy.fft import rfft, rfftfreq
 
 from scipy.io import loadmat
 
+import matplotlib.font_manager as fm
+import matplotlib.pyplot as plt
+
+font_path = "fonts/NanumGothic.ttf"
+
+font_prop = fm.FontProperties(fname=font_path)
+
+plt.rcParams["font.family"] = font_prop.get_name()
+plt.rcParams["axes.unicode_minus"] = False
+
 # Streamlit 앱 제목 설정
 st.set_page_config(layout="wide", page_title="설비 진동 데이터 이상 분석 대시보드")
 st.title("설비 진동 데이터 이상 분석 대시보드")
