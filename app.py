@@ -1,3 +1,4 @@
+%%writefile app.py
 
 import os
 import math
@@ -103,7 +104,7 @@ fig_bar, ax_bar = plt.subplots(figsize=(10, 4))
 feature_df.set_index("state")[plot_cols].T.plot(kind="bar", figsize=(10, 4), ax=ax_bar)
 ax_bar.set_title("정상/이상 특징값 비교")
 ax_bar.set_ylabel("Feature value")
-ax_bar.set_xticks(rotation=0)
+ax_bar.tick_params(axis='x', labelrotation=0) # Corrected line: use tick_params for label rotation
 ax_bar.grid(axis="y", alpha=0.3)
 st.pyplot(fig_bar)
 
